@@ -6,7 +6,7 @@
 
 using namespace std; 
 using namespace cv;
-
+ 
 class RectangleManagement {
 public:
     void mergeRectangles(std::vector<cv::Rect>& rects) {
