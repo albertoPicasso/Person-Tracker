@@ -6,6 +6,8 @@
 
 using namespace std; 
 using namespace cv;
+using Array = std::vector<float>;
+using Shape = std::vector<long>;
  
 class RectangleManagement {
 public:

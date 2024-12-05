@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenCV REQUIRED)
 set(ONNX_RUNTIME_PATH "/opt/onnxruntime")
 
-add_executable(YOLO_CXX main.cpp)
+add_executable(YOLO_CXX yolo.cpp)
 target_include_directories(YOLO_CXX PUBLIC
     "${OpenCV_INCLUDE_DIRS}"
     "${ONNX_RUNTIME_PATH}/include")
