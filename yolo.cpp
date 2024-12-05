@@ -1,3 +1,4 @@
+#include "videoProducer.h" 
 #include <opencv2/opencv.hpp>
 #include <onnxruntime_cxx_api.h>
 #include <iostream>
@@ -25,9 +26,20 @@ const char *class_names[] = {
     "teddy bear",     "hair drier", "toothbrush"};
 
 const char *objects_names[] = {
-    "traffic light"}; 
+    "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
+    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",    "parking meter", "bench",
+    "bird",           "cat",        "dog",           "horse",         "sheep",        "cow",           "elephant",
+    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",     "handbag",       "tie",
+    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball",  "kite",          "baseball bat",
+    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",       "wine glass",    "cup",
+    "fork",           "knife",      "spoon",         "bowl",          "banana",       "apple",         "sandwich",
+    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",        "donut",         "cake",
+    "chair",          "couch",      "potted plant",  "bed",           "dining table", "toilet",        "tv",
+    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",   "microwave",     "oven",
+    "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
+    "teddy bear",     "hair drier", "toothbrush"};; 
 
-//,    "person",   "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
+//,    "person",   "bicycle",    "car",    "traffic light",       "motorcycle",    "airplane",     "bus",           "train",
 //    "truck",          "boat",       
 
 
@@ -91,13 +103,22 @@ void display_image(cv::Mat image, const Array &output, const Shape &shape, const
 
 int main() {
 
-    bool use_cuda = true;
+    bool use_cuda = false;
     int image_size = 640;
     std::string model_path = "/home/al/Escritorio/horus/model/yolov7-tiny.onnx";
-    std::string image_path = "gente.png";
+    std::string image_path = "images/gente.png";
+    
+    
 
     Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "YOLOv7");
     Ort::SessionOptions options;
+    if (use_cuda) {
+        // Agregar el proveedor CUDA para habilitar el uso de GPU
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(options, 0));
+        std::cout << "Usando CUDA para la inferencia." << std::endl;
+    } else {
+        std::cout << "Usando CPU para la inferencia." << std::endl;
+    }
     Ort::Session session(env, model_path.c_str(), options);
     
     auto image = read_image(image_path, image_size); 
