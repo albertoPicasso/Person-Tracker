@@ -8,7 +8,7 @@
 
 using Array = std::vector<float>;
 using Shape = std::vector<long>;
-
+using namespace std; 
 
 const char *class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
@@ -23,19 +23,24 @@ const char *class_names[] = {
     "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",   "microwave",     "oven",
     "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"};
-/*
-const char *class_names[] = {
-    "person"};
-    **/
-std::tuple<Array, Shape, cv::Mat> read_image(const std::string &path, int size)
+
+const char *objects_names[] = {
+    "traffic light"}; 
+
+//,    "person",   "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
+//    "truck",          "boat",       
+
+
+std::tuple<Array, Shape, Shape, cv::Mat> read_image(const std::string &path, int size)
 {
     auto image = cv::imread(path);
     assert(!image.empty() && image.channels() == 3);
+    Shape originalShape = {1, image.channels(), (int)image.rows, (int)image.cols}; 
     cv::resize(image, image, {size, size});
     Shape shape = {1, image.channels(), image.rows, image.cols};
     cv::Mat nchw = cv::dnn::blobFromImage(image, 1.0, {}, {}, true) / 255.f;
     Array array(nchw.ptr<float>(), nchw.ptr<float>() + nchw.total());
-    return {array, shape, image};
+    return {array, originalShape, shape, image};
 }
 
 std::pair<Array, Shape> process_image(Ort::Session &session, Array &array, Shape shape)
@@ -52,17 +57,33 @@ std::pair<Array, Shape> process_image(Ort::Session &session, Array &array, Shape
     return {Array(ptr, ptr + shape[0] * shape[1]), shape};
 }
 
-void display_image(cv::Mat image, const Array &output, const Shape &shape)
+bool is_interest_object( std::string class_name){
+    int size = sizeof(objects_names) / sizeof(objects_names[0]);
+
+    for (int i = 0; i < size; ++i) {
+        if ((std::string)objects_names[i] == (std::string)class_name) return true; 
+    }
+    return false; 
+}
+
+
+void display_image(cv::Mat image, const Array &output, const Shape &shape, const int original_rows, const int original_cols)
 {
     for (size_t i = 0; i < shape[0]; ++i)
     {
         auto ptr = output.data() + i * shape[1];
-        int x = ptr[1], y = ptr[2], w = ptr[3] - x, h = ptr[4] - y, c = ptr[5];
-        auto color = CV_RGB(255, 255, 255);
-        auto name = std::string(class_names[c]) + ":" + std::to_string(int(ptr[6] * 100)) + "%";
-        cv::rectangle(image, {x, y, w, h}, color);
-        cv::putText(image, name, {x, y}, cv::FONT_HERSHEY_DUPLEX, 1, color);
+        int x = ptr[1], y = ptr[2], w = ptr[3] - x, h = ptr[4] - y, c = ptr[5];  
+        std::string class_name = class_names[c];
+        bool flag = is_interest_object(class_name); 
+        if (flag){
+            auto color = CV_RGB(0, 255, 0);
+            auto name = std::string(class_names[c]) + ":" + std::to_string(int(ptr[6] * 100)) + "%";
+            cv::rectangle(image, {x, y, w, h}, color);
+            cv::putText(image, name, {x, y}, cv::FONT_HERSHEY_DUPLEX, 1, color);
+        }
     }
+
+    cv::resize(image, image, {original_cols, original_rows });
 
     cv::imshow("YOLOv7 Output", image);
     cv::waitKey(0);
@@ -83,13 +104,15 @@ int main() {
     
     // Desempaquetar los valores del tuple
     Array array = std::get<0>(image);  // Primer elemento del tuple (Array)
-    Shape shape = std::get<1>(image);  // Segundo elemento del tuple (Shape)
-    cv::Mat images = std::get<2>(image); 
+    Shape original_shape = std::get<1>(image);  
+    Shape shape = std::get<2>(image);  
+    cv::Mat images = std::get<3>(image); 
 
     auto processed_result = process_image(session, array, shape);
+
     Array output_array = processed_result.first;
     Shape output_shape = processed_result.second;
     
-    display_image(images, output_array, output_shape);   
+    display_image(images, output_array, output_shape,original_shape[2], original_shape[3]);   
     return 0;
 }
