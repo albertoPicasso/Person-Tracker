@@ -36,7 +36,7 @@ private:
 };
 
 int main() {
-    std::string imagePath = "gente.png";
+    std::string imagePath = "images/gente.png";
     
     cv::Mat image = cv::imread(imagePath, cv::IMREAD_COLOR);
     if (image.empty()) {

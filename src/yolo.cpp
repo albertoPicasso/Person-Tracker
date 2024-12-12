@@ -1,4 +1,6 @@
 #include "videoProducer.h" 
+#include "observableList.h"
+#include "utils.h"
 #include <opencv2/opencv.hpp>
 #include <onnxruntime_cxx_api.h>
 #include <iostream>
@@ -6,10 +8,12 @@
 #include <string>
 #include <tuple>
 #include <cassert>
+#include <filesystem> 
 
 using Array = std::vector<float>;
 using Shape = std::vector<long>;
 using namespace std; 
+namespace fs = std::filesystem;
 
 const char *class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
@@ -105,15 +109,30 @@ int main() {
 
     bool use_cuda = false;
     int image_size = 640;
-    std::string model_path = "/home/al/Escritorio/horus/model/yolov7-tiny.onnx";
-    std::string image_path = "images/gente.png";
+    json config = Utils::readConfig("config/config.json");
     
-    
+    if (config.is_null()) {
+        return -1;  
+    }
 
+    std::string input_directory = config["input_directory"];
+    std::string log_level = config["log_level"];
+    std::string model_path = config["model_path"];
+
+    if (!fs::exists(model_path)){
+        return -2; 
+    }
+
+    std::cout << "Input Directory: " << input_directory << std::endl;
+    std::cout << "Log Level: " << log_level << std::endl;
+    std::cout << "Model path: " << model_path << std::endl; 
+
+    std::string image_path = "resources/images/gente.png";
+    
     Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "YOLOv7");
     Ort::SessionOptions options;
+
     if (use_cuda) {
-        // Agregar el proveedor CUDA para habilitar el uso de GPU
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(options, 0));
         std::cout << "Usando CUDA para la inferencia." << std::endl;
     } else {
@@ -121,6 +140,13 @@ int main() {
     }
     Ort::Session session(env, model_path.c_str(), options);
     
+    return 0;
+}
+
+
+
+/*
+
     auto image = read_image(image_path, image_size); 
     
     // Desempaquetar los valores del tuple
@@ -135,5 +161,5 @@ int main() {
     Shape output_shape = processed_result.second;
     
     display_image(images, output_array, output_shape,original_shape[2], original_shape[3]);   
-    return 0;
-}
+*/
+

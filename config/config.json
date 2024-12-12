@@ -1,0 +1,6 @@
+{
+    "input_directory": "/path/to/input",
+    "log_level": "debug", 
+    "model_path": "/home/al/Escritorio/horus/model/yolov7-tiny.onnx"
+}
+  

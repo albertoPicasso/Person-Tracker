@@ -1,6 +1,5 @@
 .vscode
 build
-images/gente.png
-images/image.png
 videoStreaming.cpp
 commands.txt
+main.cpp
