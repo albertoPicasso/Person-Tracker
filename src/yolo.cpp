@@ -1,6 +1,3 @@
-#include "videoProducer.h" 
-#include "observableList.h"
-#include "utils.h"
 #include <opencv2/opencv.hpp>
 #include <onnxruntime_cxx_api.h>
 #include <iostream>
@@ -9,6 +6,10 @@
 #include <tuple>
 #include <cassert>
 #include <filesystem> 
+
+#include "videoProducer.h" 
+#include "observableList.h"
+#include "utils.h"
 
 using Array = std::vector<float>;
 using Shape = std::vector<long>;
@@ -107,27 +108,24 @@ void display_image(cv::Mat image, const Array &output, const Shape &shape, const
 
 int main() {
 
-    bool use_cuda = false;
-    int image_size = 640;
     json config = Utils::readConfig("config/config.json");
     
     if (config.is_null()) {
         return -1;  
     }
 
-    std::string input_directory = config["input_directory"];
+    std::string image_path = config["input_directory"];
     std::string log_level = config["log_level"];
     std::string model_path = config["model_path"];
+    bool use_cuda = config["use_cuda"];
+    int image_size = config["image_size"];
 
     if (!fs::exists(model_path)){
         return -2; 
     }
 
-    std::cout << "Input Directory: " << input_directory << std::endl;
-    std::cout << "Log Level: " << log_level << std::endl;
-    std::cout << "Model path: " << model_path << std::endl; 
+    //std::cout << "Input Directory: " << image_path << std::endl;
 
-    std::string image_path = "resources/images/gente.png";
     
     Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "YOLOv7");
     Ort::SessionOptions options;

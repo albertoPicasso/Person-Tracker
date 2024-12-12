@@ -1,6 +1,8 @@
 {
     "input_directory": "/path/to/input",
     "log_level": "debug", 
-    "model_path": "/home/al/Escritorio/horus/model/yolov7-tiny.onnx"
+    "model_path": "/home/al/Escritorio/horus/model/yolov7-tiny.onnx", 
+    "use_cuda": false, 
+    "image_size": 640
 }
   
