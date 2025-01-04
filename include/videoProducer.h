@@ -7,19 +7,21 @@
 #include <queue>
 #include <iostream>
 
+#include <observableList.h>
+
 class VideoProducer {
-private:
-    cv::VideoCapture cap;               // Captura de video
-    std::queue<cv::Mat> frameQueue;     // Cola de fotogramas
-    int maxQueueSize;                   // Tamaño máximo de la cola
-    int deviceID;                       // ID del dispositivo de cámara
+    private:
+        cv::VideoCapture cap;               
+        std::queue<cv::Mat> frameQueue;     
+        int maxQueueSize;                   
+        int deviceID;                       
+        ObservableList<cv::Mat>& list;
+        bool &terminate; 
 
-public:
-    // Constructor
-    VideoProducer(int device = 0, int maxSize = 10);
-
-    // Método para capturar frames
-    void captureFrames();
+    public:
+        VideoProducer(int device, int maxSize, ObservableList<cv::Mat>& frameList, bool &terminate);
+        void test(); 
+        void captureFrames();
 };
 
-#endif // VIDEOPRODUCER_H
+#endif 

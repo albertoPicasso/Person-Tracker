@@ -6,18 +6,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenCV REQUIRED)
 set(ONNX_RUNTIME_PATH "/opt/onnxruntime")
 
-
 include_directories(${CMAKE_SOURCE_DIR}/include)
 file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 add_executable(YOLO_CXX ${SOURCES} )   
-       
+        
 target_include_directories(YOLO_CXX PUBLIC
     "${OpenCV_INCLUDE_DIRS}"
     "${ONNX_RUNTIME_PATH}/include")
+
 target_link_directories(YOLO_CXX PUBLIC
     "${ONNX_RUNTIME_PATH}/lib")
+    
 target_link_libraries(YOLO_CXX PUBLIC
     ${OpenCV_LIBS}
     "onnxruntime"
-    pthread)
+    pthread
+    rt) 
